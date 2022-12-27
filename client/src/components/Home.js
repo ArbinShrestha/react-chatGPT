@@ -17,12 +17,66 @@ const Home = () => {
   const [message, setMessage] = useState("");
   const [subscriber, setSubscriber] = useState("");
 
+  //Runs when a user submits the form
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ message, subscriber });
+    // console.log({ message, subscriber });
+    //Calls the function
+    sendNotification()
     setMessage("");
     setSubscriber("");
   };
+
+   //State representing the list of subscribers
+  const[subscribers, setSubscribers] = useState([
+    {fistName:"", lastName:"", subsriberId:"Select", _id: "null"},
+  ])
+
+  //Fetch the list of subscribers on page load
+  useEffect (()=>{
+    async function fetchSubscribers(){
+      try{
+        const request = await fetch("http://loaclhost:4000/suscribers")
+        const response = await request.json()
+        setSubscribers([...subscribers, ...response])
+      } catch(err){
+          console.log(err)
+      }
+    }
+    fetchSubscribers()
+  },[])
+
+  //Makes the POST request
+  async function sendNotification(){
+    try{
+      const request = await fetch("http://localhost:4000/noftify",{
+        method: "POST",
+        body: JSON.stringify({
+          message,
+          subscriber,
+        }),
+        headers:{
+          Accept: "applicaiton/json",
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await requestjson()
+      console.log(data)
+    } catch(err){
+      console.log(err)
+    }
+  }
+
+  //Runs when a user submits the form
+  // const handleSubmit = (e) => {
+  //   e.preventDefault()
+  //   //Calls the function
+  //   sendNotification()
+  //   setMessage("")
+  //   setSubscriber("")
+  // }
+
+  
 
   return (
     <div className="home">
@@ -62,8 +116,13 @@ const Home = () => {
             onChange={(e) => {
               setSubscriber(e.target.value);
             }}
-          >
-            <option value="Select">Select</option>
+          >{
+            subscribers.map((s)=>(
+              <option 
+                keu={s._id}
+                value={`${s.firstName} ${s.lastName} - ${s.subscriberId}`}>{`${s.firstName} ${s.lastName} - ${s.subscriberId}`}</option>
+            ))
+          }
           </select>
           <button>SEND NOTIFICATION</button>
         </form>
