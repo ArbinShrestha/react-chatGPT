@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   NovuProvider,
   PopoverNotificationCenter,
@@ -9,13 +9,16 @@ import {useNavigate} from "react-router-dom"
 
 const Home = () => {
   const navigate = useNavigate()
+  const [message, setMessage] = useState("");
+  const [subscriber, setSubscriber] = useState("");
+  //State representing the list of subscribers
+  const[subscribers, setSubscribers] = useState([
+    {firstName:"", lastName:"", subscriberId:"Select", _id: "null"},
+  ])
 
   const onNotificationClick = (notification) => {
     navigate(notification.cta.data.url)
   }
-
-  const [message, setMessage] = useState("");
-  const [subscriber, setSubscriber] = useState("");
 
   //Runs when a user submits the form
   const handleSubmit = (e) => {
@@ -27,29 +30,10 @@ const Home = () => {
     setSubscriber("");
   };
 
-   //State representing the list of subscribers
-  const[subscribers, setSubscribers] = useState([
-    {fistName:"", lastName:"", subsriberId:"Select", _id: "null"},
-  ])
-
-  //Fetch the list of subscribers on page load
-  useEffect (()=>{
-    async function fetchSubscribers(){
-      try{
-        const request = await fetch("http://loaclhost:4000/suscribers")
-        const response = await request.json()
-        setSubscribers([...subscribers, ...response])
-      } catch(err){
-          console.log(err)
-      }
-    }
-    fetchSubscribers()
-  },[])
-
-  //Makes the POST request
-  async function sendNotification(){
+   //Makes the POST request
+   async function sendNotification(){
     try{
-      const request = await fetch("http://localhost:4000/noftify",{
+      const request = await fetch("http://localhost:4000/notify",{
         method: "POST",
         body: JSON.stringify({
           message,
@@ -60,23 +44,25 @@ const Home = () => {
           "Content-Type": "application/json",
         },
       })
-      const data = await requestjson()
+      const data = await request.json()
       console.log(data)
     } catch(err){
       console.log(err)
     }
   }
-
-  //Runs when a user submits the form
-  // const handleSubmit = (e) => {
-  //   e.preventDefault()
-  //   //Calls the function
-  //   sendNotification()
-  //   setMessage("")
-  //   setSubscriber("")
-  // }
-
-  
+  //Fetch the list of subscribers on page load
+  useEffect (()=>{
+    async function fetchSubscribers(){
+      try{
+        const request = await fetch("http://localhost:4000/subscribers")
+        const response = await request.json()
+        setSubscribers([...subscribers, ...response])
+      } catch(err){
+          console.log(err)
+      }
+    }
+    fetchSubscribers()
+  },[])
 
   return (
     <div className="home">
